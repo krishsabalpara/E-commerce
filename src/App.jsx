@@ -3,6 +3,7 @@ import './App.css'
 import AdminPage from './admin pannel'
 import { BrowserRouter } from 'react-router-dom'
 import AppRoutes from './routes/AppRoutes'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -11,6 +12,7 @@ function App() {
     <>
       <BrowserRouter>
         <AppRoutes />
+         <ToastContainer />
       </BrowserRouter>
     </>
   )

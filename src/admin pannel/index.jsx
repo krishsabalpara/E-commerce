@@ -1,68 +1,169 @@
 import React, { useEffect, useState } from "react";
 import "./Admin.css";
+import { v4 as uuidv4, validate } from "uuid";
+import { toast } from "react-toastify";
 
 function AdminPage() {
   const [page, setPage] = useState("home");
-  const [Product, setProduct] = useState({})
-  const [AllProduct, setAllProduct] = useState([])
+  const [Product, setProduct] = useState([]);
+  const [addProduct, setAddProduct] = useState({
+    Category: "",
+    Inverntry: "",
+    Price: "",
+    Product: "",
+    description: ""
+  })
+  const [allCategory, setAllCategory] = useState([]);
+  const [inputCategory, setInputCategory] = useState({
+    Category: "",
+  });
 
-  useEffect(() => { setAllProduct(JSON.parse(localStorage.getItem("Product")) || []) }
-    , [])
+  useEffect(() => {
+    setProduct(JSON.parse(localStorage.getItem("Product")) || []);
+    setAllCategory(JSON.parse(localStorage.getItem("Category")) || []);
+  }, []);
 
   const HandelInput = (e) => {
-    setProduct((pov) => ({
+    setAddProduct((pov) => ({
       ...pov,
-      [e.target.name]: e.target.value
-    }))
-  }
+      [e.target.name]: e.target.value,
+    }));
+  };
 
+  let validate = "false";
+  const validateProduct = () => {
+    if (addProduct.Product === "") { toast("Fill Name") }
+    else if (addProduct.description === "") { toast("Fill description") }
+    else if (addProduct.Price === "") { toast("Fill Price") }
+    else if (addProduct.Inverntry === "") { toast("Fill Inverntry") }
+    else if (addProduct.Category === "") { toast("select Category") }
+    else validate = "true"
+  }
   const HandelAddProductbut = () => {
-    const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
-    DataBase.push(Product);
-    setAllProduct(DataBase)
-    localStorage.setItem("Product", JSON.stringify(DataBase))
+    validateProduct()
+    if (validate == "true") {
+      const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
+      let newProduct = {
+        ...addProduct,
+        id: uuidv4()
+      };
+      DataBase.push(newProduct);
+      setProduct(DataBase);
+      localStorage.setItem("Product", JSON.stringify(DataBase));
+      setAddProduct({
+        Category: "",
+        Inverntry: "",
+        Price: "",
+        Product: "",
+        description: ""
+      })
+      validate = "false"
+    }
+  };
+
+  const HandleCategoryInput = (e) => {
+    setInputCategory({
+      Category: e.target.value
+    });
+  };
+
+  const validateCategory = () => {
+    if(inputCategory.Category === ""){toast("Enter Category Name")}
+    else {validate = "true"}
   }
 
+  const HandleAddCategory = () => {
+    validateCategory()
+    if (validate == "true") {
+      let temp = {
+        Category: inputCategory.Category,
+        id: uuidv4(),
+      };
+      allCategory.push(temp);
+      setAllCategory(allCategory);
+      localStorage.setItem("Category", JSON.stringify(allCategory));
+      setInputCategory({
+        Category: ""
+      })
+      validate = "false"
+    }
+  };
 
-  //  const Handelinput = (el) => {
-  //       setTaskData(
-  //           (pov) => ({
-  //               ...pov,
-  //               [el.target.name]: el.target.value
-  //           }))
-  //   }
+  const HandleDeletCatagury = (id) => {
+    let temp = allCategory.filter((e) => {
+      return e.id !== id;
+    });
+    setAllCategory(temp);
+
+    localStorage.setItem(
+      "Category",
+      JSON.stringify(temp)
+    );
+  };
+
+  const handleEditProduct = (id) => {
+    let edit = Product.find( (el) => { return(el.id === id) } )
+    setAddProduct(edit)
+    setPage("add")
+  };
+
+  const handleDeletProduct = (id) => {
+    let temp = Product.filter((e) => {
+      return e.id !== id;
+    });
+
+    setProduct(temp);
+
+    localStorage.setItem(
+      "Product",
+      JSON.stringify(temp)
+    );
+  };
 
   return (
     <div className="admin">
+
       {/* Sidebar */}
       <div className="sidebar">
         <h2 className="logo">Admin Panel</h2>
+
         <ul className="menu">
+
           <li
             className={page === "home" ? "active" : ""}
             onClick={() => setPage("home")}
           >
             Home
           </li>
+
           <li
             className={page === "add" ? "active" : ""}
             onClick={() => setPage("add")}
           >
-            Add New
+            Add New Product
           </li>
+
+          <li
+            className={page === "category" ? "active" : ""}
+            onClick={() => setPage("category")}
+          >
+            Add New Category
+          </li>
+
           <li
             className={page === "inventory" ? "active" : ""}
             onClick={() => setPage("inventory")}
           >
             Inventory
           </li>
+
         </ul>
       </div>
 
       {/* Main Content */}
       <div className="content">
 
-        {/* only shows if page is "home" */}
+        {/* Home */}
         {page === "home" && (
           <div className="section">
             <h2>Home</h2>
@@ -70,32 +171,163 @@ function AdminPage() {
           </div>
         )}
 
-        {/* only shows if page is "add" */}
+        {/* Add Product */}
         {page === "add" && (
           <div className="section">
-            <h2>Add New Product</h2>
-            <input type="text" name="Product" placeholder="Product Name" onChange={(e) => { HandelInput(e) }} />
-            <input type="text" name="description" placeholder="description" onChange={(e) => { HandelInput(e) }} />
-            <input type="text" name="Price" placeholder="Price" onChange={(e) => { HandelInput(e) }} />
-            <input type="text" name="Inverntry" placeholder="Inverntry" onChange={(e) => { HandelInput(e) }} />
-            <select name="Category" onChange={(e) => { HandelInput(e) }}>
-              <option value="">Select Category</option>
-              <option value="Rings">Rings</option>
-              <option value="Necklaces">Necklaces</option>
-              <option value="Earrings">Earrings</option>
-              <option value="Bracelets">Bracelets</option>
 
+            <h2>Add New Product</h2>
+
+            <input
+              type="text"
+              name="Product"
+              placeholder="Product Name"
+              value={addProduct.Product}
+              onChange={(e) => {
+                HandelInput(e);
+              }}
+            />
+
+            <input
+              type="text"
+              name="description"
+              placeholder="description"
+              value={addProduct.description}
+              onChange={(e) => {
+                HandelInput(e);
+              }}
+            />
+
+            <input
+              type="text"
+              name="Price"
+              placeholder="Price"
+              value={addProduct.Price}
+              onChange={(e) => {
+                HandelInput(e);
+              }}
+            />
+
+            <input
+              type="text"
+              name="Inverntry"
+              placeholder="Inverntry"
+              value={addProduct.Inverntry}
+              onChange={(e) => {
+                HandelInput(e);
+              }}
+            />
+
+            <select
+            value={addProduct.Category}
+              name="Category"
+              onChange={(e) => {
+                HandelInput(e);
+              }}
+            >
+              <option value="">
+                Select Category
+              </option>
+
+              {allCategory.map((e, index) => {
+                return (
+                  <option
+                    value={e.Category}
+                    key={index}
+                  >
+                    {e.Category}
+                  </option>
+                );
+              })}
             </select>
-            <button onClick={HandelAddProductbut}>Add Product</button>
+
+            <button onClick={HandelAddProductbut}>
+              Add Product
+            </button>
+
           </div>
         )}
 
-        {/* only shows if page is "inventory" */}
+        {/* Category */}
+        {page === "category" && (
+          <div className="section">
+
+            <h2>Add New Category</h2>
+
+            <div className="category-form">
+
+              <div className="form-group">
+
+                <label>
+                  Category Name
+                </label>
+
+                <input
+                  type="text"
+                  name="Category"
+                  placeholder="Enter category name"
+                  value={inputCategory.Category}
+                  onChange={(e) =>
+                    HandleCategoryInput(e)
+                  }
+                />
+
+              </div>
+
+              <button onClick={HandleAddCategory}>
+                Add Category
+              </button>
+
+            </div>
+
+            {/* Already Added Categories */}
+            <div className="category-list">
+
+              <h2>
+                Already Added Categories
+              </h2>
+
+              <div className="category-items">
+
+                {allCategory.map((e, index) => {
+                  return (
+                    <div
+                      className="category-item"
+                      key={index}
+                    >
+
+                      <span>
+                        {e.Category}
+                      </span>
+
+                      <button
+                        onClick={() => {
+                          HandleDeletCatagury(e.id);
+                        }}
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+                  );
+                })}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* Inventory */}
         {page === "inventory" && (
           <div className="section">
+
             <h2>Inventory</h2>
+
             <table>
+
               <thead>
+
                 <tr>
                   <th>No.</th>
                   <th>Product Name</th>
@@ -106,27 +338,67 @@ function AdminPage() {
                   <th>Edit</th>
                   <th>Remove</th>
                 </tr>
-              </thead>
-              <tbody>
-                {
-                  AllProduct.map((el, index) => {
-                      return (
-                        <tr key={index}>
-                          <td>{index+1}</td>
-                          <td>{el.Product}</td>
-                          <td>{el.description}</td>
-                          <td>{el.Price}</td>
-                          <td>{el.Inverntry}</td>
-                          <td>{el.Category}</td>
-                          <td><button>Edit</button></td>
-                          <td><button>Delete</button></td>
-                        </tr>
-                      )
 
-                  })
-                }
+              </thead>
+
+              <tbody>
+
+                {Product.map((el, index) => {
+                  return (
+                    <tr key={index}>
+
+                      <td>
+                        {index + 1}
+                      </td>
+
+                      <td>
+                        {el.Product}
+                      </td>
+
+                      <td>
+                        {el.description}
+                      </td>
+
+                      <td>
+                        {el.Price}
+                      </td>
+
+                      <td>
+                        {el.Inverntry}
+                      </td>
+
+                      <td>
+                        {el.Category}
+                      </td>
+
+                      <td>
+                        <button
+                          onClick={() => {
+                            handleEditProduct(el.id);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </td>
+
+                      <td>
+                        <button
+                          onClick={() => {
+                            handleDeletProduct(el.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+
+                    </tr>
+                  );
+                })}
+
               </tbody>
+
             </table>
+
           </div>
         )}
 

@@ -228,3 +228,48 @@ table td button:last-child:hover {
     overflow-x: auto;
   }
 }
+.category-list {
+  margin-top: 30px;
+  max-width: 650px;
+}
+
+.category-list h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.category-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.category-item span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.category-item button {
+  width: auto;
+  padding: 8px 15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.category-item button:hover {
+  background: #c0392b;
+}
