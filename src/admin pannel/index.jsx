@@ -42,22 +42,39 @@ function AdminPage() {
   const HandelAddProductbut = () => {
     validateProduct()
     if (validate == "true") {
-      const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
-      let newProduct = {
-        ...addProduct,
-        id: uuidv4()
-      };
-      DataBase.push(newProduct);
-      setProduct(DataBase);
-      localStorage.setItem("Product", JSON.stringify(DataBase));
-      setAddProduct({
-        Category: "",
-        Inverntry: "",
-        Price: "",
-        Product: "",
-        description: ""
-      })
-      validate = "false"
+      if (addProduct.id) {
+        const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
+        DataBase.map( (el) => {
+          if(el.id === addProduct.id){
+            el.Product = addProduct.Product
+            el.Category = addProduct.Category
+            el.Inverntry = addProduct.Inverntry
+            el.Price = addProduct.Price
+            el.description = addProduct.description
+          }
+        } )
+        setProduct(DataBase);
+        localStorage.setItem("Product", JSON.stringify(DataBase));
+        setPage("inventory")
+      }
+      else {
+        const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
+        let newProduct = {
+          ...addProduct,
+          id: uuidv4()
+        };
+        DataBase.push(newProduct);
+        setProduct(DataBase);
+        localStorage.setItem("Product", JSON.stringify(DataBase));
+        setAddProduct({
+          Category: "",
+          Inverntry: "",
+          Price: "",
+          Product: "",
+          description: ""
+        })
+        validate = "false"
+      }
     }
   };
 
@@ -68,8 +85,8 @@ function AdminPage() {
   };
 
   const validateCategory = () => {
-    if(inputCategory.Category === ""){toast("Enter Category Name")}
-    else {validate = "true"}
+    if (inputCategory.Category === "") { toast("Enter Category Name") }
+    else { validate = "true" }
   }
 
   const HandleAddCategory = () => {
@@ -102,7 +119,7 @@ function AdminPage() {
   };
 
   const handleEditProduct = (id) => {
-    let edit = Product.find( (el) => { return(el.id === id) } )
+    let edit = Product.find((el) => { return (el.id === id) })
     setAddProduct(edit)
     setPage("add")
   };
@@ -218,7 +235,7 @@ function AdminPage() {
             />
 
             <select
-            value={addProduct.Category}
+              value={addProduct.Category}
               name="Category"
               onChange={(e) => {
                 HandelInput(e);
