@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./login.css"
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from '../../Redux/slices/userSlice'
 
 function Auth() {
   const [page, setPage] = useState("login");
+  const user = useSelector((state) => state.user)
   const [inPutData, setInPutData] = useState(
     page === "login" ? {
       email: "",
@@ -21,6 +22,12 @@ function Auth() {
   )
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+
+  useEffect( () => {
+      if (user.name !== "") {
+      navigate("/")
+    }},[] )
 
   const HandleInput = (e) => {
 
@@ -59,13 +66,13 @@ function Auth() {
           }
           users.push(temp)
           localStorage.setItem("Users", JSON.stringify(users))
-          dispatch(
-                  loginUser({
-                    id: temp.id,
-                    name: temp.name,
-                    email: temp.email,
-                  })
-                )
+            dispatch(
+                    loginUser({
+                      id: temp.id,
+                      name: temp.name,
+                      email: temp.email,
+                    })
+                  )
                 navigate(`//?id=${temp.id}`)
         }
 
