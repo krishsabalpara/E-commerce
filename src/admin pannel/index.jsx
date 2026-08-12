@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Admin.css";
 import { v4 as uuidv4, validate } from "uuid";
 import { toast } from "react-toastify";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 function AdminPage() {
   const [page, setPage] = useState("home");
@@ -17,6 +18,14 @@ function AdminPage() {
   const [inputCategory, setInputCategory] = useState({
     Category: "",
   });
+  const [params] = useSearchParams();
+  const id = params.get("id");
+  const navigat = useNavigate()
+
+  useEffect( () => {
+    if (id != "bd876462-13e2-409b-9ae4-d8fd0310b3c5") {
+    navigat("/login")
+  }},[] )
 
   useEffect(() => {
     setProduct(JSON.parse(localStorage.getItem("Product")) || []);
@@ -44,15 +53,15 @@ function AdminPage() {
     if (validate == "true") {
       if (addProduct.id) {
         const DataBase = JSON.parse(localStorage.getItem("Product")) || [];
-        DataBase.map( (el) => {
-          if(el.id === addProduct.id){
+        DataBase.map((el) => {
+          if (el.id === addProduct.id) {
             el.Product = addProduct.Product
             el.Category = addProduct.Category
             el.Inverntry = addProduct.Inverntry
             el.Price = addProduct.Price
             el.description = addProduct.description
           }
-        } )
+        })
         setProduct(DataBase);
         localStorage.setItem("Product", JSON.stringify(DataBase));
         setPage("inventory")

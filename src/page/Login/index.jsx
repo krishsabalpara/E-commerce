@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "./login.css"
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom";
 
 function Auth() {
   const [page, setPage] = useState("login");
@@ -15,6 +17,7 @@ function Auth() {
       confirmPassword: ""
     }
   )
+  const navigate = useNavigate()
 
   const HandleInput = (e) => {
 
@@ -47,7 +50,11 @@ function Auth() {
         if (Chaker.includes(true)) {
           toast("User already exiest");
         } else {
-          users.push(inPutData)
+          const temp = {
+            ...inPutData,
+            id: uuidv4()
+          }
+          users.push(temp)
           localStorage.setItem("Users", JSON.stringify(users))
         }
 
@@ -66,7 +73,9 @@ function Auth() {
         if (temp.length > 0) {
           if (temp[0].email === inPutData.email) {
             if (temp[0].password === inPutData.password) {
-              toast("Login")
+              if(temp[0].id === "bd876462-13e2-409b-9ae4-d8fd0310b3c5"){
+                navigate(`/admin/?id=${temp[0].id}`)
+              }
             } else {
               toast("Enter Valid Password")
             }
