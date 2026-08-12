@@ -1,8 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"
+
+
 
 function Navbar() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user)
+  console.log(user);
 
   return (
     <nav className="navbar">
@@ -19,9 +24,10 @@ function Navbar() {
       <div className="nav-icons">
         <span>Cart (0)</span>
 
-        <button onClick={() => navigate("/login")}>
-          Login
-        </button>
+        {
+          user.name === "" ? <button onClick={() => navigate("/login")}>
+            Login
+          </button> : user.name }
       </div>
 
     </nav>

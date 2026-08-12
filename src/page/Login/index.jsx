@@ -3,6 +3,8 @@ import "./login.css"
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginUser } from '../../Redux/slices/userSlice'
 
 function Auth() {
   const [page, setPage] = useState("login");
@@ -18,6 +20,7 @@ function Auth() {
     }
   )
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const HandleInput = (e) => {
 
@@ -56,6 +59,14 @@ function Auth() {
           }
           users.push(temp)
           localStorage.setItem("Users", JSON.stringify(users))
+          dispatch(
+                  loginUser({
+                    id: temp.id,
+                    name: temp.name,
+                    email: temp.email,
+                  })
+                )
+                navigate(`//?id=${temp.id}`)
         }
 
       }
@@ -73,8 +84,18 @@ function Auth() {
         if (temp.length > 0) {
           if (temp[0].email === inPutData.email) {
             if (temp[0].password === inPutData.password) {
-              if(temp[0].id === "bd876462-13e2-409b-9ae4-d8fd0310b3c5"){
+              if (temp[0].email === "admin@admin.com") {
                 navigate(`/admin/?id=${temp[0].id}`)
+              }
+              else {
+                dispatch(
+                  loginUser({
+                    id: temp[0].id,
+                    name: temp[0].name,
+                    email: temp[0].email,
+                  })
+                )
+                navigate(`//?id=${temp[0].id}`)
               }
             } else {
               toast("Enter Valid Password")
