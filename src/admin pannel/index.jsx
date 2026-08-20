@@ -19,11 +19,11 @@ function AdminPage() {
     Category: "",
   });
   const [params] = useSearchParams();
-  const id = params.get("id");
+  const email = params.get("email");
   const navigat = useNavigate()
 
   useEffect( () => {
-    if (id != "bd876462-13e2-409b-9ae4-d8fd0310b3c5") {
+    if (email != "admin@admin.com") {
     navigat("/login")
   }},[] )
 

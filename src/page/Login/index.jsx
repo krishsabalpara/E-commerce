@@ -25,7 +25,7 @@ function Auth() {
 
 
   useEffect( () => {
-      if (user.name !== "") {
+      if (user.id !== "") {
       navigate("/")
     }},[] )
 
@@ -92,7 +92,7 @@ function Auth() {
           if (temp[0].email === inPutData.email) {
             if (temp[0].password === inPutData.password) {
               if (temp[0].email === "admin@admin.com") {
-                navigate(`/admin/?id=${temp[0].id}`)
+                navigate(`/admin/?email=${temp[0].email}`)
               }
               else {
                 dispatch(

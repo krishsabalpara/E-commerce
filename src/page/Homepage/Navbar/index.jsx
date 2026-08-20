@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"
 import './navbar.css'
 import { loginUser } from "../../../Redux/slices/userSlice";
@@ -10,6 +10,11 @@ function Navbar() {
   const user = useSelector((state) => state.user)
   const [showMenu, setShowMenu] = useState(false)
   const dispatch = useDispatch()
+  const cart = useSelector((state) => state.cart);
+
+  const handelcart = () => {
+    navigate("/cart")
+  }
   
 
   return (
@@ -25,7 +30,7 @@ function Navbar() {
       </ul>
 
       <div className="nav-icons">
-        <span>Cart (0)</span>
+        <button onClick={handelcart}>Cart {cart.items.length}</button>
 
         {
           user.name === "" ? <button onClick={() => navigate("/login")}>
