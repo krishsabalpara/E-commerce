@@ -1,160 +1,146 @@
 import React, { useEffect, useState } from "react";
-import "./login.css"
+import "./login.css";
 import { toast } from "react-toastify";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from '../../Redux/slices/userSlice'
+import { loginUser } from "../../Redux/slices/userSlice";
 
+/**
+ * Auth - Authentication page component.
+ * Toggles between "login" and "signup" views.
+ * Users are stored in localStorage under the "Users" key.
+ * Admin user (admin@admin.com) is redirected to the admin panel on login.
+ */
 function Auth() {
   const [page, setPage] = useState("login");
-  const user = useSelector((state) => state.user)
-  const [inPutData, setInPutData] = useState(
-    page === "login" ? {
-      email: "",
-      password: ""
-    } : {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: ""
+  const user = useSelector((state) => state.user);
+  const [inputData, setInputData] = useState({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Redirect to homepage if the user is already logged in
+  useEffect(() => {
+    if (user.id !== "") {
+      navigate("/");
     }
-  )
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  }, [user.id, navigate]);
 
+  /** Update form state when any input field changes */
+  const handleInput = (e) => {
+    setInputData({
+      ...inputData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-  useEffect( () => {
-      if (user.id !== "") {
-      navigate("/")
-    }},[] )
-
-  const HandleInput = (e) => {
-
-    setInPutData({
-      ...inPutData,
-      [e.target.name]: e.target.value
-    })
-  }
-
+  /** Validate form fields based on the current page (login vs signup) */
   const validation = () => {
-    if (inPutData.name === "" && page === "signup") { toast("Enter Name"); return false }
-    else if (inPutData.email === "") { toast("Enter Email"); return false }
-    else if (inPutData.password === "") { toast("Enter Password"); return false }
-    else if (inPutData.confirmPassword === "" && page === "signup") { toast("Enter Confirm Password"); return false }
-    else { return true }
-  }
+    if (inputData.name === "" && page === "signup") { toast("Enter Name"); return false; }
+    else if (inputData.email === "") { toast("Enter Email"); return false; }
+    else if (inputData.password === "") { toast("Enter Password"); return false; }
+    else if (inputData.confirmPassword === "" && page === "signup") { toast("Enter Confirm Password"); return false; }
+    // Bug 1 fix: check that password and confirmPassword match
+    else if (inputData.password !== inputData.confirmPassword && page === "signup") { toast("Passwords do not match"); return false; }
+    else { return true; }
+  };
 
-  const HandleButton = () => {
-    let valid = validation()
+  /** Handle login or signup form submission */
+  const handleSubmit = () => {
+    let valid = validation();
 
+    // --- Signup flow ---
     if (page === "signup") {
       if (valid === true) {
         const users = JSON.parse(localStorage.getItem("Users")) || [];
 
-        let Chaker = users.map((el) => {
-          return el.email === inPutData.email;
-        })
+        // Check if a user with this email already exists
+        let emailExists = users.some((el) => el.email === inputData.email);
 
-
-        if (Chaker.includes(true)) {
-          toast("User already exiest");
+        if (emailExists) {
+          toast("User already exists");
         } else {
-          const temp = {
-            ...inPutData,
-            id: uuidv4()
-          }
-          users.push(temp)
-          localStorage.setItem("Users", JSON.stringify(users))
-            dispatch(
-                    loginUser({
-                      id: temp.id,
-                      name: temp.name,
-                      email: temp.email,
-                    })
-                  )
-                navigate(`//?id=${temp.id}`)
-        }
+          // Bug 2 fix: only store necessary fields (exclude confirmPassword)
+          const newUser = {
+            name: inputData.name,
+            email: inputData.email,
+            password: inputData.password,
+            id: uuidv4(),
+          };
+          users.push(newUser);
+          localStorage.setItem("Users", JSON.stringify(users));
 
+          // Auto-login the newly registered user
+          dispatch(
+            loginUser({
+              id: newUser.id,
+              name: newUser.name,
+              email: newUser.email,
+            })
+          );
+          navigate(`/?id=${newUser.id}`);
+        }
       }
     }
 
+    // --- Login flow ---
     if (page === "login") {
-
       if (valid === true) {
         const users = JSON.parse(localStorage.getItem("Users")) || [];
 
-        const temp = users.filter((el) => {
-          return el.email === inPutData.email
-        })
+        // Find the user matching the entered email
+        const matchedUsers = users.filter((el) => el.email === inputData.email);
 
-        if (temp.length > 0) {
-          if (temp[0].email === inPutData.email) {
-            if (temp[0].password === inPutData.password) {
-              if (temp[0].email === "admin@admin.com") {
-                navigate(`/admin/?email=${temp[0].email}`)
-              }
-              else {
-                dispatch(
-                  loginUser({
-                    id: temp[0].id,
-                    name: temp[0].name,
-                    email: temp[0].email,
-                  })
-                )
-                navigate(`//?id=${temp[0].id}`)
-              }
+        // Bug 9 fix: removed redundant second email check (filter already guarantees match)
+        if (matchedUsers.length > 0) {
+          if (matchedUsers[0].password === inputData.password) {
+            // Redirect admin to the admin panel
+            if (matchedUsers[0].email === "admin@admin.com") {
+              navigate(`/admin/?email=${matchedUsers[0].email}`);
             } else {
-              toast("Enter Valid Password")
+              // Login regular user via Redux
+              dispatch(
+                loginUser({
+                  id: matchedUsers[0].id,
+                  name: matchedUsers[0].name,
+                  email: matchedUsers[0].email,
+                })
+              );
+              navigate(`/?id=${matchedUsers[0].id}`);
             }
+          } else {
+            toast("Enter Valid Password");
           }
         } else {
-          toast("User not Found")
+          toast("User not Found");
         }
       }
-
     }
-  }
-
-  //   ```jsx
-  // const HandleButton = () => {
-  //   let valid = validation();
-
-  //   if (valid === true) {
-  //     const users = JSON.parse(localStorage.getItem("Users")) || [];
-
-  //     let Chaker = users.map((el) => {
-  //       return el.email === inPutData.email;
-  //     });
-
-  //     if (Chaker.includes(true)) {
-  //       toast("User already exists");
-  //     } else {
-  //       users.push(inPutData);
-  //       localStorage.setItem("Users", JSON.stringify(users));
-  //     }
-  //   }
-  // };
-  // ```
-
+  };
 
   return (
     <div className="auth-container">
 
       <div className="auth-box">
 
+        {/* Login Form */}
         {page === "login" && (
           <div>
 
             <h2>Login</h2>
 
+            {/* Bug 6 fix: all inputs are now controlled via value={inputData.field} */}
             <div className="form-group">
               <label>Email</label>
               <input
                 type="email"
                 name="email"
                 placeholder="Enter your email"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.email}
+                onChange={handleInput}
               />
             </div>
 
@@ -164,22 +150,23 @@ function Auth() {
                 name="password"
                 type="password"
                 placeholder="Enter your password"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.password}
+                onChange={handleInput}
               />
             </div>
 
-            <button onClick={HandleButton}>Login</button>
+            <button onClick={handleSubmit}>Login</button>
 
             <p>
               Don't have an account?
               <span onClick={() => {
-                setPage("signup")
-                setInPutData({
+                setPage("signup");
+                setInputData({
                   name: "",
                   email: "",
                   password: "",
-                  confirmPassword: ""
-                })
+                  confirmPassword: "",
+                });
               }}>
                 {" "}Sign Up
               </span>
@@ -188,6 +175,7 @@ function Auth() {
           </div>
         )}
 
+        {/* Signup Form */}
         {page === "signup" && (
           <div>
 
@@ -199,7 +187,8 @@ function Auth() {
                 name="name"
                 type="text"
                 placeholder="Enter your name"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.name}
+                onChange={handleInput}
               />
             </div>
 
@@ -209,7 +198,8 @@ function Auth() {
                 name="email"
                 type="email"
                 placeholder="Enter your email"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.email}
+                onChange={handleInput}
               />
             </div>
 
@@ -219,7 +209,8 @@ function Auth() {
                 name="password"
                 type="password"
                 placeholder="Enter your password"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.password}
+                onChange={handleInput}
               />
             </div>
 
@@ -229,20 +220,21 @@ function Auth() {
                 name="confirmPassword"
                 type="password"
                 placeholder="Confirm your password"
-                onChange={(e) => { HandleInput(e) }}
+                value={inputData.confirmPassword}
+                onChange={handleInput}
               />
             </div>
 
-            <button onClick={HandleButton}>Sign Up</button>
+            <button onClick={handleSubmit}>Sign Up</button>
 
             <p>
               Already have an account?
               <span onClick={() => {
-                setPage("login")
-                setInPutData({
+                setPage("login");
+                setInputData({
                   email: "",
-                  password: ""
-                })
+                  password: "",
+                });
               }}>
                 {" "}Login
               </span>
@@ -253,7 +245,7 @@ function Auth() {
 
       </div>
 
-    </div >
+    </div>
   );
 }
 

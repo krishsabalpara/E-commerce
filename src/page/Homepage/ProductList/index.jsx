@@ -1,63 +1,124 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../../Redux/slices/cartSlice";
+import { toast } from "react-toastify";
 
+/**
+ * ProductList - Displays products with category filtering logic.
+ * Category filtering logic is implemented directly above the product display.
+ */
 function ProductList() {
-  const AllProduct = JSON.parse(localStorage.getItem("Product")) || []
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Load all products from localStorage (managed by the admin panel)
+  const allProducts = JSON.parse(localStorage.getItem("Product")) || [];
+
+  // Load categories from localStorage or fallback to defaults
+  const savedCategories = JSON.parse(localStorage.getItem("Category")) || [];
+  const defaultCategories = [
+    { id: "cat-1", Category: "Rings" },
+    { id: "cat-2", Category: "Necklaces" },
+    { id: "cat-3", Category: "Earrings" },
+    { id: "cat-4", Category: "Bracelets" },
+  ];
+  const categoriesList = savedCategories.length > 0 ? savedCategories : defaultCategories;
 
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
-  const handeladdcart = (product) => {
-
+  /** Add a product to the cart; shows toast if user is not logged in */
+  const handleAddToCart = (product) => {
     if (user.id === "") {
-      alert("Please Login First");
+      toast("Please Login First");
       return;
     }
 
     dispatch(
       addToCart({
         userId: user.id,
-        product: product
+        product: product,
       })
     );
+    toast(`${product.Product} added to cart!`);
   };
 
+  // --- Category Filtering Logic ---
+  const filteredProducts =
+    selectedCategory === "All"
+      ? allProducts
+      : allProducts.filter(
+          (product) =>
+            product.Category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
+        );
+
   return (
-    <div className="section">
+    <>
+      {/* Category Filter Section */}
+      <div className="section" id="shop">
+        <h2>Shop by Category</h2>
 
-      <h2>Featured Products</h2>
+        <div className="category-grid">
+          {/* "All" Category Pill */}
+          <div
+            className={`category-card ${selectedCategory === "All" ? "active" : ""}`}
+            onClick={() => setSelectedCategory("All")}
+          >
+            All
+          </div>
 
-      <div className="product-grid">
-
-        {AllProduct.map((el , index) => {
-
-          return (
-            <div className="product-card" key={el.id}>
-
-              <div className="product-image">
-              </div>
-
-              <h3>
-                {el.Product}
-              </h3>
-
-              <p>
-                ${el.Price}
-              </p>
-
-              <button onClick={() => handeladdcart(el)}>
-                Add to Cart
-              </button>
-
+          {/* Dynamic Categories */}
+          {categoriesList.map((cat, index) => (
+            <div
+              key={cat.id || index}
+              className={`category-card ${selectedCategory === cat.Category ? "active" : ""}`}
+              onClick={() => setSelectedCategory(cat.Category)}
+            >
+              {cat.Category}
             </div>
-          );
-
-        })}
-
+          ))}
+        </div>
       </div>
 
-    </div>
+      {/* Featured / Filtered Products Section */}
+      <div className="section">
+        <h2>
+          {selectedCategory === "All"
+            ? "Featured Products"
+            : `${selectedCategory} Collection`}
+        </h2>
+
+        {filteredProducts.length === 0 ? (
+          <p
+            style={{
+              textAlign: "center",
+              color: "var(--text-secondary)",
+              fontSize: "16px",
+              marginTop: "20px",
+            }}
+          >
+            No products found in "{selectedCategory}".
+          </p>
+        ) : (
+          <div className="product-grid">
+            {filteredProducts.map((el) => {
+              return (
+                <div className="product-card" key={el.id}>
+                  <div className="product-image"></div>
+
+                  <h3>{el.Product}</h3>
+
+                  <p>₹{el.Price}</p>
+
+                  <button onClick={() => handleAddToCart(el)}>
+                    Add to Cart
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

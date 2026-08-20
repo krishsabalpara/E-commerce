@@ -1,18 +1,19 @@
-import { useState } from 'react'
 import './App.css'
-import AdminPage from './admin pannel'
 import { BrowserRouter } from 'react-router-dom'
 import AppRoutes from './routes/AppRoutes'
 import { ToastContainer } from 'react-toastify'
 
+/**
+ * App - Root application component.
+ * Wraps the entire app with BrowserRouter for client-side routing
+ * and includes ToastContainer for global toast notifications.
+ */
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
       <BrowserRouter>
         <AppRoutes />
-         <ToastContainer />
+        <ToastContainer />
       </BrowserRouter>
     </>
   )

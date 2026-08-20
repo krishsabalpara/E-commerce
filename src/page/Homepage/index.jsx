@@ -1,22 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./Homepage.css";
 import Navbar from "./Navbar";
 import Hero from "./Hero";
-import Categories from "./Categories";
 import ProductList from "./ProductList";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { setCart } from "../../Redux/slices/cartSlice";
 
+/**
+ * UserHomePage - Main storefront page.
+ * Composes Navbar, Hero, ProductList (with Category filter), and Footer.
+ * Handles loading and persisting the user's cart from/to localStorage.
+ */
 function UserHomePage() {
-
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const cart = useSelector((state) => state.cart);
 
-  // User Cart Load From LocalStorage
+  // Load the logged-in user's cart from localStorage on mount or user change
   useEffect(() => {
-
     if (user.id !== "") {
       const carts = JSON.parse(localStorage.getItem("Cart")) || [];
 
@@ -27,25 +29,24 @@ function UserHomePage() {
       dispatch(
         setCart({
           userId: user.id,
-          items: userCart ? userCart.items : []
+          items: userCart ? userCart.items : [],
         })
       );
     }
-
   }, [user.id, dispatch]);
 
-
-  // Cart Save To LocalStorage
+  // Persist the cart to localStorage whenever it changes
   useEffect(() => {
-
     if (cart.userId === "") return;
+
     const carts = JSON.parse(localStorage.getItem("Cart")) || [];
 
     const userCart = {
       userId: cart.userId,
-      items: cart.items
+      items: cart.items,
     };
 
+    // Update existing user's cart or add a new entry
     const index = carts.findIndex(
       (item) => item.userId === cart.userId
     );
@@ -59,20 +60,12 @@ function UserHomePage() {
     localStorage.setItem("Cart", JSON.stringify(carts));
   }, [cart]);
 
-
   return (
     <div className="store">
-
       <Navbar />
-
       <Hero />
-
-      <Categories />
-
       <ProductList />
-
       <Footer />
-
     </div>
   );
 }

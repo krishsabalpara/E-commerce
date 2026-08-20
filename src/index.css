@@ -1,0 +1,87 @@
+/* ==========================================
+   ROYAL LUXURY DESIGN SYSTEM - LUMEN JEWELRY
+   ========================================== */
+
+:root {
+  /* Royal Color Palette */
+  --bg-main: #0b0d13;
+  --bg-secondary: #131722;
+  --bg-card: #181c2b;
+  --bg-card-hover: #202538;
+  --bg-glass: rgba(24, 28, 43, 0.75);
+  
+  /* Gold Accents & Metallic Gradients */
+  --gold-primary: #d4af37;
+  --gold-light: #f3e5ab;
+  --gold-accent: #e6c687;
+  --gold-dark: #a37c27;
+  --gold-metallic: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+  --gold-button: linear-gradient(135deg, #d4af37 0%, #aa771c 100%);
+  --gold-button-hover: linear-gradient(135deg, #e6c687 0%, #c59b27 100%);
+  --gold-border: rgba(212, 175, 55, 0.35);
+  --gold-border-glow: rgba(212, 175, 55, 0.6);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-gold: #f3e5ab;
+
+  /* Typography */
+  --font-royal: 'Cinzel', 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Shadows & Glows */
+  --shadow-royal: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-gold: 0 0 25px rgba(212, 175, 55, 0.2);
+  --glow-button: 0 4px 20px rgba(212, 175, 55, 0.35);
+
+  /* Radius & Transitions */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dark);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-primary);
+}
+
+/* Global Heading Styles */
+h1, h2, h3, h4, .royal-font {
+  font-family: var(--font-royal);
+  letter-spacing: 0.04em;
+}
+
+/* Global Gold Gradient Text */
+.gold-text {
+  background: var(--gold-metallic);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,103 +1,90 @@
 import React, { useEffect, useState } from "react";
 import "../Admin.css";
 
+/**
+ * Orders (Admin) - Admin order management component.
+ * Displays all customer orders in a table and allows
+ * marking orders as "completed" via the View button.
+ */
 export default function Orders() {
+  const [orders, setOrders] = useState([]);
 
-    const [orders, setOrders] = useState([]);
+  // Load all orders from localStorage on mount, filtering out null entries
+  useEffect(() => {
+    const allOrders =
+      JSON.parse(localStorage.getItem("orders")) || [];
 
-    useEffect(() => {
-        const allOrders =
-            JSON.parse(localStorage.getItem("orders")) || [];
+    setOrders(allOrders.filter((el) => el !== null));
+  }, []);
 
-        setOrders(allOrders.filter((el) => el !== null));
-    }, []);
+  /** Mark an order as "completed" by its orderId and persist to localStorage (Bug 10 fix) */
+  const handleCompleteOrder = (id) => {
+    const latestOrders = JSON.parse(localStorage.getItem("orders")) || [];
+    const updatedOrders = latestOrders.map((el) => {
+      if (el && el.orderId === id) {
+        return {
+          ...el,
+          status: "completed",
+        };
+      }
+      return el;
+    });
 
-    const handelview = (id) => {
+    const filtered = updatedOrders.filter((el) => el !== null);
+    setOrders(filtered);
+    localStorage.setItem("orders", JSON.stringify(filtered));
+  };
 
-        const updatedOrders = orders.map((el) => {
+  return (
+    <div className="section">
 
-            if (el.orderId === id) {
-                return {
-                    ...el,
-                    status: "completed"
-                };
-            }
+      <h2>Orders</h2>
+      <p>Manage all customer orders</p>
 
-            return el;
-        });
+      <table>
 
-        setOrders(updatedOrders);
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Date</th>
+            <th>User Name</th>
+            <th>Items</th>
+            <th>Total Bill</th>
+            <th>Status</th>
+            <th>View</th>
+          </tr>
+        </thead>
 
-        localStorage.setItem(
-            "orders",
-            JSON.stringify(updatedOrders)
-        );
-    };
+        <tbody>
+          {orders.map((el, index) => {
+            return (
+              <tr key={el.orderId}>
 
-    return (
-        <div className="section">
+                <td>{index + 1}</td>
 
-            <h2>Orders</h2>
-            <p>Manage all customer orders</p>
+                <td>{el.date}</td>
 
-            <table>
+                <td>{el.userId}</td>
 
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Date</th>
-                        <th>User Name</th>
-                        <th>Items</th>
-                        <th>Total Bill</th>
-                        <th>Status</th>
-                        <th>View</th>
-                    </tr>
-                </thead>
+                <td>{el.items?.length || 0}</td>
 
-                <tbody>
+                <td>₹{el.total}</td>
 
-                    {orders.map((el, index) => {
+                <td>{el.status}</td>
 
-                        return (
-                            <tr key={el.orderId}>
+                <td>
+                  <button onClick={() => handleCompleteOrder(el.orderId)}>
+                    View
+                  </button>
+                </td>
 
-                                <td>{index + 1}</td>
+              </tr>
+            );
+          })}
+        </tbody>
 
-                                <td>{el.date}</td>
+      </table>
 
-                                <td>{el.userId}</td>
-
-                                <td>
-                                    {el.items?.length || 0}
-                                </td>
-
-                                <td>
-                                    ₹{el.total}
-                                </td>
-
-                                <td>
-                                    {el.status}
-                                </td>
-
-                                <td>
-                                    <button
-                                        onClick={() =>
-                                            handelview(el.orderId)
-                                        }
-                                    >
-                                        View
-                                    </button>
-                                </td>
-
-                            </tr>
-                        );
-
-                    })}
-
-                </tbody>
-
-            </table>
-
-        </div>
-    );
+    </div>
+  );
 }
