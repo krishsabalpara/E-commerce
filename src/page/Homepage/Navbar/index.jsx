@@ -49,6 +49,7 @@ function Navbar() {
                 {showMenu && (
                   <div className="dropdown">
                     <button>Edit Profile</button>
+                    <button onClick={() => { navigate("/orders") }}>My Orders</button>
                     <button onClick={() => {
                       dispatch(
                         loginUser({

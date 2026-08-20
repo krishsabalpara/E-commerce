@@ -1,63 +1,65 @@
 import React, { useEffect } from 'react'
 import "./cart.css"
 import { useDispatch, useSelector } from 'react-redux'
-import { decreaseQuantity, increaseQuantity, removeFromCart, setCart } from '../../Redux/slices/cartSlice'
+import { clearCart, decreaseQuantity, increaseQuantity, removeFromCart, setCart } from '../../Redux/slices/cartSlice'
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
 
 export default function Cart() {
 
     const dispatch = useDispatch()
-
+    const navigat = useNavigate()
     const cart = useSelector((state) => state.cart)
     const items = cart.items
 
 
     const user = useSelector((state) => state.user);
-      // User Cart Load From LocalStorage
-      useEffect(() => {
-    
+    // User Cart Load From LocalStorage
+    useEffect(() => {
+
         if (user.id !== "") {
-          const carts = JSON.parse(localStorage.getItem("Cart")) || [];
-    
-          const userCart = carts.find(
-            (cart) => cart.userId === user.id
-          );
-    
-          dispatch(
-            setCart ({
-              userId: user.id,
-              items: userCart ? userCart.items : []
-            })
-          );
+            const carts = JSON.parse(localStorage.getItem("Cart")) || [];
+
+            const userCart = carts.find(
+                (cart) => cart.userId === user.id
+            );
+
+            dispatch(
+                setCart({
+                    userId: user.id,
+                    items: userCart ? userCart.items : []
+                })
+            );
         }
-    
-      }, [user.id, dispatch]);
-    
-    
-      // Cart Save To LocalStorage
-      useEffect(() => {
-    
+
+    }, [user.id, dispatch]);
+
+
+    // Cart Save To LocalStorage
+    useEffect(() => {
+
         if (cart.userId === "") return;
         const carts = JSON.parse(localStorage.getItem("Cart")) || [];
-    
+
         const userCart = {
-          userId: cart.userId,
-          items: cart.items
+            userId: cart.userId,
+            items: cart.items
         };
-    
+
         const index = carts.findIndex(
-          (item) => item.userId === cart.userId
+            (item) => item.userId === cart.userId
         );
-    
+
         if (index !== -1) {
-          carts[index] = userCart;
+            carts[index] = userCart;
         } else {
-          carts.push(userCart);
+            carts.push(userCart);
         }
-    
+
         localStorage.setItem("Cart", JSON.stringify(carts));
-      }, [cart]);
-    
-    
+    }, [cart]);
+
+
 
     const subTotal = items.reduce((total, el) => {
         const price = Number(String(el.Price).replace(/,/g, "")) || 0
@@ -85,9 +87,29 @@ export default function Cart() {
     }
 
     const handelchechout = () => {
-        const orders = JSON.parse(localStorage.getItem("orders")) || []
-        
-    }
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    const newOrder = {
+        orderId: uuidv4(),
+        userId: user.id,
+        items: items,
+        subTotal: subTotal,
+        discount: discount,
+        shipping: shipping,
+        date: new Date().toLocaleDateString(),
+        total: Total,
+        status: "Pending",
+        paymentStatus: "Pending",
+    };
+
+    orders.push(newOrder);
+
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    dispatch(clearCart());
+
+    navigat(`/?id=${user.id}`);
+};
 
     return (
         <div className="cart-page">

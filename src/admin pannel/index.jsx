@@ -3,6 +3,7 @@ import "./Admin.css";
 import { v4 as uuidv4, validate } from "uuid";
 import { toast } from "react-toastify";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import Orders from "./orders";
 
 function AdminPage() {
   const [page, setPage] = useState("home");
@@ -22,10 +23,11 @@ function AdminPage() {
   const email = params.get("email");
   const navigat = useNavigate()
 
-  useEffect( () => {
+  useEffect(() => {
     if (email != "admin@admin.com") {
-    navigat("/login")
-  }},[] )
+      navigat("/login")
+    }
+  }, [])
 
   useEffect(() => {
     setProduct(JSON.parse(localStorage.getItem("Product")) || []);
@@ -181,6 +183,13 @@ function AdminPage() {
             onClick={() => setPage("inventory")}
           >
             Inventory
+          </li>
+
+          <li
+            className={page === "orders" ? "active" : ""}
+            onClick={() => setPage("orders")}
+          >
+            Orders
           </li>
 
         </ul>
@@ -421,12 +430,17 @@ function AdminPage() {
                   );
                 })}
 
+                
+
               </tbody>
 
             </table>
 
           </div>
         )}
+        {page === "orders" && (
+                  <Orders />
+                )}
 
       </div>
     </div>
